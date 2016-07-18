@@ -1,0 +1,177 @@
+
+svg {
+	background-color: #999;
+	cursor: default;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+}
+
+
+path.FCFF_path{
+	stroke: #FFF;
+	stroke-width: 4;
+	fill: none;
+	stroke-opacity:0.8;
+	stroke-dasharray: '5,5';
+	stroke-linecap: 'square';
+}
+
+
+path.curly_brace_path {
+	stroke: #000000;
+	stroke-width: 1px;
+	fill: none;
+	stroke-opacity:0.5;
+}
+rect.active{
+	stroke-opacity:1.0;
+}
+
+text.internal_label {
+	pointer-events: none;
+	text-anchor: middle;
+	font: 12px serif;
+	letter-spacing: 3px;
+	fill: #FCECC5;
+}
+text.curly_brace_label {
+	pointer-events: none;
+	text-anchor: middle;
+	font: 16px serif;
+	fill: #000000;
+}
+
+/*BALANCE SHEET*/
+/*BALANCE SHEET / BACKGROUNDS*/
+#total_assets_rect{
+	fill: #48624D;
+}
+#total_liabilities_rect{
+	fill: #956067; 
+}
+#total_equities_rect{
+	fill: #606695;
+}
+/*BALANCE SHEET / ASSETS / CURRENT ASSETS*/
+#cash_rect{
+	fill: #132D48;
+}
+#short_term_investments_rect{
+	fill: #2969AB;
+}
+#accts_receivable_rect{
+	fill: #3681CF;
+}
+#inventory_rect{
+	fill: #4098F2;
+}
+#other_current_assets_rect{
+	fill: #3B5BE1;
+}
+/*BALANCE SHEET / ASSETS / NON-CURRENT ASSETS*/
+#long_term_investments_rect{
+	fill: #0A102E;
+}
+#property_plant_equipment_rect{
+	fill: #041162;
+}
+#goodwill_rect{
+	fill: #041162;
+}
+#accumulated_depreciation_rect{
+	fill: 000000#;
+}
+#intangible_assets_rect{
+	fill: #030E47;
+}
+#miscellaneous_assets_rect{
+	fill: #041162;
+}
+#deferred_long_term_asset_charges_rect{
+	fill: #203496;
+}
+
+/*INCOME STATEMENT*/
+#revenue_rect{
+	fill: #000C1D;
+}
+#cost_of_revenue_rect{
+	fill: #0E1D32;
+}
+#depreciation_amortization_rect{
+	fill: #1F3C58;
+}
+#operating_expenses_rect{
+	fill: #122D46;
+}
+#interest_expense_rect{
+	fill: #1A3658;
+}
+#interest_tax_shield_rect{
+	fill: #5A3658;
+}
+#taxes_paid_rect{
+	fill: #7C000A;
+}
+#net_income_rect{
+	fill: #F8A671;
+}
+#net_income_text{
+	fill: #7C000A;
+}
+#fc_inv_rect{
+	fill: #F8A671;
+}
+#fc_inv_text{
+	fill: #7C000A;
+}
+#wc_inv_rect{
+	fill: #F8A671;
+}
+#wc_inv_text{
+	fill: #7C000A;
+}
+/*#EBIT_rect{
+	fill:#BBB;
+}*/
+
+/*FCFF */
+#bgn_acc_depr_rect{
+	fill: #42131A;
+}
+#depreciation_rect{
+	fill: #6B1F2A;
+}
+#end_acc_depr_rect{
+	fill: #FF4964;
+}
+
+#bgn_gross_PPE_rect{
+	fill: #373A78;
+}
+#fixed_cap_inv_rect{
+	fill: #666CDE;
+	stroke: #FFF;
+	stroke-width: 2;
+	stroke-opacity:0.8;
+	stroke-dasharray: 5 5;
+	stroke-linecap: 'square';
+}
+#end_gross_PPE_rect{
+	fill: #7278F8;
+}
+
+#bgn_net_PPE_rect{
+	fill: #1A4021;
+}
+#fixed_cap_growth_rect{
+	fill: #24592E;
+}
+#end_net_PPE_rect{
+	fill: #3E994F;
+}
+
+

@@ -1,0 +1,112 @@
+html * {
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+*, *:after, *:before {
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+
+html, body {
+	height: 100%;
+}
+
+
+/* -------------------------------- 
+
+App Style
+
+-------------------------------- */
+body {
+	font-size: 100%;
+	font-family: 'Lato', Raleway;
+	font-weight: 300;
+	background-color: #ffffff;
+	color: #7F8099;
+}
+
+.navbar {
+	background: #0F1A2B;
+	color: #ffffff;
+	font-size: 200%;
+	height: 60px;
+	border: 0;
+	width: 100%;
+}
+.navbar-brand {
+	padding-top: 24px;
+  font-size: 140%;
+	display: block;
+	position: relative;
+}
+.navbar ul {
+	padding-top: 10px;
+}
+.navbar ul li a:hover {
+	color: #FF9A23;
+}
+
+.margin-top {
+	margin-top:60px;
+}
+.display-container {
+	width: 100%;
+	padding-left: 0;
+	padding-right: 0;
+}
+
+
+/*#cd-logo {
+	margin-left: 10px;
+	margin-top: 8px;
+	width: 100px;
+	height: 50px;
+}
+#cd-logo img {
+	display: inline-block;
+}
+.navOp {
+	opacity: 0.9;
+}*
+
+.navbar-form {
+	padding-top: 0px;
+	padding-right: 10px;
+}
+.navbar ul {
+	padding-top: 10px;
+}
+.navbar ul li a:hover {
+	color: #FF9A23;
+}
+
+
+p {
+	font-size: 90%;
+	display: inline;
+}
+p.spacer {
+	padding-right: 10px;
+}
+
+*/
+
+
+/*
+.spacer {
+	height: 10px;
+}
+
+.btn {
+	background: #FF9A23;
+	border: 0;
+	border-radius: 0px;
+}
+.btn:hover {
+	background: #FFE50D;
+	color: #0F1A2B;
+}
+*/
