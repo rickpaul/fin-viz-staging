@@ -61,12 +61,13 @@
 	</div>
 </body>
 <!-- JavaScript / custom  -->
-	<script src='../js/VizFin01/vizfin_FCFF.js'></script>
 	<script src='../js/vizfin_Display.js'></script>
+	<script src='../js/vizfin_Base.js'></script>
+	<script src='../js/VizFin03/vizfin_FCInv.js'></script>
 	<script type='text/javascript'>
 		'use strict'
 		var vizfin = vizfin || {};
-		var display; // keep outside for debugging
+		var display; // DEBUG keep outside for debugging
 		document.onload = (function(vizfin, d3, undefined) {
 			var svg_width = 800;
 			var svg_height = 800;
