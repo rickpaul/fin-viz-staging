@@ -3,7 +3,7 @@
 var vizfin = vizfin || {};
 
 (function(global_ref) {
-	var navbar_height = 60; // Must Match HTML!
+	var navbar_height = 60; 
 	var min_width = 900;
 	var min_height = 500;
 	// Taken from http://bl.ocks.org/alexhornbake/6005176
