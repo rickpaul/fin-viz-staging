@@ -1,3 +1,13 @@
+/*
+	This code has many inefficiencies that could be cleaned up.
+		It's not a big deal, since we're still relatively lightweight and 
+		not drawing a lot. It is ugly though.
+	Inefficiencies:
+		1) 	Every time you get a rectangle size, it makes a recursive call 
+				down the stack of rectangles it depends on.
+		2) 	We're re-drawing every time we resize. We should take advantage 
+				of d3's update.
+*/
 'use strict'
 var vizfin = vizfin || {};
 
@@ -8,32 +18,28 @@ var vizfin = vizfin || {};
 		btm: 40,
 		left: 60,
 		rght: 300,
-	}
+	};
 
 	var width = 400;
 	var brace_width = 28;
 	var brace_space = 5;
 
 	////////////////////////////////////////////////////////////////////////
-	// FCFF DISPLAY Definition 
+	// FCFF_Display Constructor 
 	////////////////////////////////////////////////////////////////////////
 	function FCFF_Display(svg_) {
 		////////////////////////////////////////////////////////////////////////
-		// FCFF DISPLAY Variables 
+		// Call Super-Constructor
 		////////////////////////////////////////////////////////////////////////
-		// Display Variables
-		this.svg = svg_;
-		this.svg_group = this.svg
-			.append('g')
-			.attr('transform', 'translate('+MARGINS.left+','+MARGINS.top+')')
-			.classed('FCFF_Display', true);
-		this.x_scale = d3.scale.linear().domain([0,1]).range([0,1]);
-		this.y_scale = d3.scale.linear().domain([0,810]).range([0,800]);
+		vizfin.vizfin_Base.call(this, svg_);
 
-		this._rght_offset = 0;
-		this._left_offset = 0;
-
-		// Financial Variables
+		this.title_group
+			.append('svg:text')
+		.text('Free Cash Flow to the Firm (FCFF)')
+		.classed('title_text', true);
+		////////////////////////////////////////////////////////////////////////
+		// Financial Variables 
+		////////////////////////////////////////////////////////////////////////
 		this._revenue = 800;
 		this._cost_of_revenue = 300;
 		this._depreciation_amortization = 100;
@@ -290,7 +296,6 @@ var vizfin = vizfin || {};
 			get: function() { return width; },
 		});
 	};
-
 	////////////////////////////////////////////////////////////////////////
 	// FCFF DISPLAY Prototype Functions 
 	////////////////////////////////////////////////////////////////////////
@@ -302,111 +307,76 @@ var vizfin = vizfin || {};
 				this.revenue-this.working_capital_inv/(1-this.tax_rate)*2])
 		]);
 	}
-	FCFF_Display.prototype.redefine_x_scale_domain = function() {
-		return;
+	FCFF_Display.prototype.redefine_translation = function(width_, height) {
+		this.svg_group
+			.attr('transform', 'translate('+(MARGINS.left+this._left_offset*(brace_width + brace_space))+','+MARGINS.top+')');
+		this.title_group
+			.attr('transform', 'translate('+( width_ / 2 )+','+(MARGINS.top / 2)+')');
 	};
 	FCFF_Display.prototype.redefine_y_scale_range = function(height_) {
-		this.y_scale.range([0, height_ - MARGINS.top - MARGINS.btm])
-	};
-	FCFF_Display.prototype.redefine_x_scale_range = function(width_) {
-		return;
-	};
-	FCFF_Display.prototype.redefine_translation = function(width_, height_) {
-		return; 
+		this.y_scale
+			.range([0, height_ - MARGINS.top - MARGINS.btm]);
 	};
 	FCFF_Display.prototype.draw_rects = function() {
-		this.draw_rect(this.svg_group, this.revenue_pos, 'revenue');
-		this.draw_rect(this.svg_group, this.cost_of_revenue_pos, 'cost_of_revenue', 'Cost of Revenue');
-		this.draw_rect(this.svg_group, this.operating_expenses_pos, 'operating_expenses', 'Operating Expenses');
-		this.draw_rect(this.svg_group, this.depreciation_amortization_pos, 'depreciation_amortization', 'Depreciation and Amortization');
-		this.draw_rect(this.svg_group, this.interest_expense_pos, 'interest_expense', 'Interest Expense');
-		this.draw_rect(this.svg_group, this.interest_tax_shield_pos, 'interest_tax_shield', 'Tax Shield');
-		this.draw_rect(this.svg_group, this.paid_taxes_pos, 'taxes_paid', 'Taxes Paid');
-		this.draw_rect(this.svg_group, this.net_income_pos, 'net_income', 'Net Income');
-		this.draw_rect(this.svg_group, this.net_income_pos, 'net_income', 'Net Income');
-		this.draw_rect(this.svg_group, this.fixed_capital_inv_pos, 'fc_inv', 'FCInv');
-		this.draw_rect(this.svg_group, this.working_capital_inv_pos, 'wc_inv', 'WCInv');
+		this.draw_rect_corners(this.svg_group, 'revenue', this.revenue_pos, 'revenue');
+		this.draw_rect_corners(this.svg_group, 'cost_of_revenue', this.cost_of_revenue_pos,  'Cost of Revenue');
+		this.draw_rect_corners(this.svg_group, 'operating_expenses', this.operating_expenses_pos,  'Operating Expenses');
+		this.draw_rect_corners(this.svg_group, 'depreciation_amortization', this.depreciation_amortization_pos, 'Depreciation and Amortization');
+		this.draw_rect_corners(this.svg_group, 'interest_expense', this.interest_expense_pos,  'Interest Expense');
+		this.draw_rect_corners(this.svg_group, 'interest_tax_shield', this.interest_tax_shield_pos,  'Tax Shield');
+		this.draw_rect_corners(this.svg_group, 'taxes_paid', this.paid_taxes_pos, 'Taxes Paid');
+		this.draw_rect_corners(this.svg_group, 'net_income', this.net_income_pos, 'Net Income');
+		this.draw_rect_corners(this.svg_group, 'net_income', this.net_income_pos, 'Net Income');
+		this.draw_rect_corners(this.svg_group, 'fc_inv', this.fixed_capital_inv_pos, 'FCInv');
+		this.draw_rect_corners(this.svg_group, 'wc_inv', this.working_capital_inv_pos, 'WCInv');
 	};
+	FCFF_Display.prototype.draw_buttons = function() {
+		var count = 0;
+		
+		var position = {
+			left: this.rect_width + this._left_offset * (brace_width + brace_space),
+			top: ((button_height + button_space) * count) + MARGINS.top,
+		};
+		position.rght = position.left + button_width
+		position.btm = position.top + button_height;
+
+	}
 	FCFF_Display.prototype.draw_labels = function() {
 		this.draw_external_label(this.svg_group, this.revenue_pos, 'revenue', 'Revenue', true);
 		this.draw_external_label(this.svg_group, this.EBIT_pos, 'EBIT', 'EBIT');
 		this.draw_external_label(this.svg_group, this.EBITDA_pos, 'EBITDA', 'EBITDA');
 	};
-	FCFF_Display.prototype.draw_rect = function(parent_element, position_dict, id_prefix, text) {
-		var l_ = position_dict.left;
-		var t_ = position_dict.top;
-		var r_ = position_dict.rght;
-		var b_ = position_dict.btm;
-		var tor_ = position_dict.text_offset_rght || 0;
-		var tod_ = position_dict.text_offset_down || 0;
+	FCFF_Display.prototype.draw_external_label = function(parent_element, rect_position, id_prefix, text, left) {
+		// Retrieve Rect Positioning
+		var l_ = rect_position.left;
+		var t_ = rect_position.top;
+		var b_ = rect_position.btm;
+		// Translate Positioning For Call to Base Draw
+		var o_ = (left ? this._left_offset++ : this._rght_offset++);
+		var s_ = (left ? -1 : 1) * o_ * (brace_width + brace_space);
+		var position = {
+			x_: (left ? 0 : this.rect_width) + s_,
+			y_: t_,
+			h_: (b_-t_),
+			w_: brace_width,
+		};
+		// Create Parent Group
 		var group = parent_element
 			.append('g')
 				.classed('grouping', true)
-				.attr('id', id_prefix+'_g')
-				.attr('transform', 'translate('+this.x_scale(l_)+','+this.y_scale(t_)+')');
-		group.append('rect')
-			.attr('width', this.x_scale(r_ - l_))
-			.attr('height', this.y_scale(b_ - t_))
-			.attr('x', 0)
-			.attr('y', 0)
-			.attr('id', id_prefix+'_rect');
-		if(text) {
-			group.append('text')
-				.attr('transform', 'translate('+this.x_scale((r_ - l_)/2+tor_)+','+this.y_scale(7+(b_ - t_)/2+tod_)+')')
-				.attr('id', id_prefix+'_text')
-				.classed('internal_label', true)
-				.text(text);
-		}
+				.attr('id', id_prefix+'_bracket_g');				
+		this.draw_curly_brace(group, id_prefix, position, left);
+		this.draw_curly_brace_label(group, id_prefix, position, text, left);
 	};
-	FCFF_Display.prototype.draw_external_label = function(parent_element, position_dict, id_prefix, text, left) {
-		var l_ = position_dict.left;
-		var t_ = position_dict.top;	
-		var b_ = position_dict.btm;
-		if (left) {
-			var o_ = this._left_offset++;
-		} else {
-			var o_ = this._rght_offset++;
-		}
-		var group = parent_element
-			.append('g')
-				.classed('grouping', true)
-				.attr('id', id_prefix+'_bracket_g')
-				.attr('transform', 'translate('+this.x_scale(l_)+','+this.y_scale(t_)+')');
-		this.draw_curly_brace(group, id_prefix, (b_-t_), o_, left);
-		this.draw_curly_brace_label(group, id_prefix, (b_-t_), o_, text, left);
-	};
-	FCFF_Display.prototype.draw_curly_brace = function(parent_element, id_prefix, height, offset, left) {
-		if (left) {
-			var x_ = -offset*brace_width - brace_space;
-			var b_ = parent_element
-				.append('path')
-					.attr('d', vizfin.get_curly_brace_path(x_, 0, x_, this.y_scale(height), brace_width, .5))
-		} else {
-			var x_ = this.x_scale(this.rect_width) + offset*brace_width + brace_space;
-			var b_ = parent_element
-				.append('path')
-					.attr('d', vizfin.get_curly_brace_path(x_, this.y_scale(height), x_, 0, brace_width, .5));
-		}
-		b_
-			.classed('curly_brace_path', true)
-			.classed('active', true)
-			.attr('id', id_prefix+'_bracket_path');
-	};
-	FCFF_Display.prototype.draw_curly_brace_label = function(parent_element, id_prefix, height, offset, text, left) {
-		if (left) {
-			var x_ = -(1+offset)*brace_width - brace_space/2 - 7;
-			var t_ = parent_element.append('text')
-				.attr('transform', 'translate('+x_+','+this.y_scale(height/2)+') rotate(-90)');
-		} else {
-			var x_ = this.x_scale(this.rect_width) + (1+offset)*brace_width + brace_space/2 + 7;
-			var t_ = parent_element.append('text')
-				.attr('transform', 'translate('+x_+','+this.y_scale(height/2)+') rotate(90)');
-		}
-		t_
-			.text(text)
-			.classed('external_label', true)
-			.classed('active', true)
-			.attr('id', id_prefix+'_bracket_text');
+
+	FCFF_Display.prototype.draw_curly_brace_label = function(parent_element, id_prefix, position, text, left) {
+		var o_ = (brace_width + brace_space/2 + 2);
+		var pos_ = {
+			x_: this.x_scale(position.x_) + (left ? -o_ : o_),
+			y_: this.y_scale(position.y_ + position.h_/2),
+			r_: (left ? -90 : 90),
+		};
+		this.draw_text(parent_element, id_prefix, '', 'external_label', pos_, text);
 	};
 	FCFF_Display.prototype.draw_FCFF_path = function(parent_element) {
 		var fc_inv_y_pos = (this.fixed_capital_inv >= 0 ? this.fixed_capital_inv_pos.top : this.fixed_capital_inv_pos.btm);
@@ -422,15 +392,17 @@ var vizfin = vizfin || {};
 			' L '+this.x_scale(this.EBITDA_pos.rght)+' '+this.y_scale(this.EBITDA_pos.top)+
 			' Z'
 		);
-		parent_element.append('path')
-			.attr('d', path_)
-			.attr('stroke-dasharray', '10,5')
-			.classed('FCFF_path', true);
+		parent_element
+			.append('g')
+		.classed('grouping', true)
+		.attr('id', 'FCFF_path_g')
+			.append('svg:path')
+		.attr('d', path_)
+		.attr('stroke-dasharray', '10,5')
+		.classed('FCFF_path', true);
 	};
 	FCFF_Display.prototype.draw = function() {
-		d3.selectAll('rect').remove();
-		d3.selectAll('path').remove();
-		d3.selectAll('text').remove();
+		d3.selectAll('.grouping').remove();
 		this._rght_offset = 0;
 		this._left_offset = 0;
 		this.draw_rects();

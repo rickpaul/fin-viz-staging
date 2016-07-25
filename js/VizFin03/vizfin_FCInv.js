@@ -16,8 +16,8 @@ var vizfin = vizfin || {};
 		w_: 16,
 	};
 
-	var brace_width = 20; // measured in pixels
-	var brace_space = .9; // measured in scaled units (width, height in 100's.)
+	var brace_width = 16; // measured in pixels
+	var brace_space = .8; // measured in scaled units (width, height in 100's.)
 	//////////////////////////////////////////////////////////////////////////
 	// FCInv_Display Constructor
 	//////////////////////////////////////////////////////////////////////////
@@ -26,6 +26,11 @@ var vizfin = vizfin || {};
 		// Call Super-Constructor
 		////////////////////////////////////////////////////////////////////////
 		vizfin.vizfin_Base.call(this, svg_);
+		// Add Title
+		this.title_group
+			.append('svg:text')
+		.text('Fixed Capital Investment and Depreciation')
+		.classed('title_text', true);
 		////////////////////////////////////////////////////////////////////////
 		// Display Variables 
 		////////////////////////////////////////////////////////////////////////
@@ -86,13 +91,16 @@ var vizfin = vizfin || {};
 			get: function() { return this.cap_ex - this.gain_on_asset_sales; },
 		});
 	}
-	FCInv_Display.prototype = Object.create(vizfin.vizfin_Base.prototype)
+	FCInv_Display.prototype = Object.create(vizfin.vizfin_Base.prototype);
 	FCInv_Display.prototype.constructor = FCInv_Display;
 	//////////////////////////////////////////////////////////////////////////
 	// FCInv_Display Prototype Functions
 	//////////////////////////////////////////////////////////////////////////
 	FCInv_Display.prototype.redefine_translation = function(width_, height_){
-		this.svg_group.attr('transform', 'translate('+(width_/2)+','+(height_/2)+')');
+		this.svg_group
+			.attr('transform', 'translate('+(width_/2)+','+(height_/2)+')');
+		this.title_group
+			.attr('transform', 'translate('+( width_/2 )+','+(MARGINS.top / 2)+')');
 	};
 	FCInv_Display.prototype.redefine_y_scale_range = function(height_){
 		this.y_scale.range([-0.5*height_ + MARGINS.top, 0.5*height_ - MARGINS.btm]);
@@ -107,7 +115,6 @@ var vizfin = vizfin || {};
 			h_: BOX_POS.h_,
 			w_: BOX_POS.w_,
 		};
-
 		// Draw Middle Column
 		position.x_ = 0;
 		position.y_ = 0;
@@ -139,7 +146,7 @@ var vizfin = vizfin || {};
 		// Draw Left Brackets
 		position.h_ *= 1.5;
 		position.y_ = -BOX_POS.y_mult - position.h_/2;
-		position.x_ = -BOX_POS.x_mult - position.w_/2 - brace_space;
+		position.x_ = -BOX_POS.x_mult - BOX_POS.w_/2 - brace_space;
 		// Draw First Row Left Bracket
 		this.draw_external_label(this.svg_group, 'bgn_bracket_left', position, 'Begin', true);
 		// Draw Last Row Left Bracket
@@ -148,7 +155,7 @@ var vizfin = vizfin || {};
 		// Draw Right Brackets
 		// Draw First Row Right Bracket
 		position.y_ = -BOX_POS.y_mult - position.h_/2;
-		position.x_ = BOX_POS.x_mult + position.w_/2 + brace_space;
+		position.x_ = BOX_POS.x_mult + BOX_POS.w_/2 + brace_space;
 		this.draw_external_label(this.svg_group, 'bgn_bracket_left', position, '', false);
 		// Draw Last Row Right Bracket
 		position.y_ = BOX_POS.y_mult - position.h_/2;
@@ -211,43 +218,18 @@ var vizfin = vizfin || {};
 		if( text !== '') {
 			this.draw_curly_brace_label(group, id_prefix, position, text, left);
 		}
-	}
+	};
+	
 	FCInv_Display.prototype.draw_curly_brace_label = function(parent_element, id_prefix, position, text, left) {
-		var x_pos = position.x_; // really just a vertical line, so c_x = x
-		var y_pos = position.y_;
-		var h_ = position.h_;
-		if (left) {
-			var x_ = (this.x_scale(x_pos) - brace_width - brace_space/2 - 10);
-			var r_ = -90;
-		} else {
-			var x_ = (this.x_scale(x_pos) + brace_width + brace_space/2 + 10);
-			var r_ = 90;
-		}
-		parent_element.append('svg:text')
-			.attr('transform', 'translate('+x_+','+this.y_scale(y_pos + h_/2)+') rotate('+r_+')')
-			.classed('curly_brace_label', true)
-			.classed('active', true)
-			.attr('id', id_prefix+'_bracket_text')
-			.text(text);
+		var o_ = (brace_width + brace_space/2 + 10);
+		var pos_ = {
+			x_: this.x_scale(position.x_) + (left ? -o_ : o_),
+			y_: this.y_scale(position.y_ + position.h_/2),
+			r_: (left ? -90 : 90),
+		};
+		this.draw_text(parent_element, id_prefix, '', 'external_label', pos_, text);
 	};
-	FCInv_Display.prototype.draw_curly_brace = function(parent_element, id_prefix, position, left) {
-		var x_pos = position.x_; // really just a vertical line, so c_x = x
-		var y_pos = position.y_;
-		var h_ = position.h_;
-		if (left) {
-			var d_ = global_ref.get_curly_brace_path(0, 0, 0, this.y_scale(h_), brace_width, .5);
-		} else {
-			var d_ = global_ref.get_curly_brace_path(0, this.y_scale(h_), 0, 0, brace_width, .5);
-		}
-		parent_element.append('svg:path')
-			.attr('transform', 'translate('+this.x_scale(x_pos)+','+this.y_scale(y_pos)+')')
-			.classed('curly_brace_path', true)
-			.classed('active', true)
-			.attr('id', id_prefix+'_bracket_path')
-			.attr('d', d_);
-	};
+
 
 	global_ref.FCInv_Display = FCInv_Display;
 })(vizfin);
-
-

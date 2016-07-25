@@ -17,8 +17,10 @@ var vizfin = vizfin || {};
 	//////////////////////////////////////////////////////////////////////////
 	var vizfin_Base = function(svg_) {
 		// Display Variables
+		console.log('loading base');
 		this.svg = svg_;
-		this.svg_group = this.svg.append('g');
+		this.svg_group = this.svg.append('g').attr('id', 'viz_g');
+		this.title_group = this.svg.append('g').attr('id', 'title_g');
 		this.x_scale = d3.scale.linear().domain([0,1]).range([0,1]);
 		this.y_scale = d3.scale.linear().domain([0,1]).range([0,1]);
 
@@ -48,18 +50,15 @@ var vizfin = vizfin || {};
 		d3.selectAll('.grouping').remove();
 	};
 
-	vizfin_Base.prototype.draw_rect = function(parent_element, id_prefix, position, text) {
-		var l_ = position.left;
-		var t_ = position.top;
-		var r_ = position.rght;
-		var b_ = position.btm;
-		position.y_ = (b_+t_)/2;
-		position.x_ = (r_+l_)/2;
-		position.h_ = (b_-t_);
-		position.w_ = (r_-l_);
-		this.draw_rect_center(parent_element, id_prefix, position, text);
+	vizfin_Base.prototype.draw_rect_corners = function(parent_element, id_prefix, position, text) {
+		var pos_ = {
+			y_ : (position.btm+position.top) / 2,
+			x_ : (position.rght+position.left) / 2,
+			h_ : (position.btm-position.top),
+			w_ : (position.rght-position.left)
+		};
+		return this.draw_rect_center(parent_element, id_prefix, pos_, text);
 	};
-
 	vizfin_Base.prototype.draw_rect_center = function(parent_element, id_prefix, position, text) {
 		var c_x = position.x_;
 		var c_y = position.y_;
@@ -72,7 +71,7 @@ var vizfin = vizfin || {};
 				.classed('grouping', true)
 				.attr('id', id_prefix+'_g')
 				.attr('transform', 'translate('+this.x_scale(c_x-w_/2)+','+this.y_scale(c_y-h_/2)+')');
-		group
+		var rect = group
 			.append('svg:rect')
 				.attr('width', this.x_scale(w_))
 				.attr('height', this.y_scale(h_))
@@ -114,6 +113,23 @@ var vizfin = vizfin || {};
 				.text(text);
 	};
 
+	vizfin_Base.prototype.draw_curly_brace = function(parent_element, id_prefix, position, left_oriented) {
+		var x_pos = position.x_; // position from middle of opening (draw vertical line from first to last pt.)
+		var y_pos = position.y_; // position from top of opening
+		var h_ = position.h_;
+		var w_ = position.w_;
+		if ( left_oriented ) {
+			var d_ = global_ref.get_curly_brace_path(0, 0, 0, this.y_scale(h_), w_, .5);
+		} else {
+			var d_ = global_ref.get_curly_brace_path(0, this.y_scale(h_), 0, 0, w_, .5);
+		}
+		parent_element.append('svg:path')
+			.attr('transform', 'translate('+this.x_scale(x_pos)+','+this.y_scale(y_pos)+')')
+			.classed('curly_brace_path', true)
+			.classed('active', true)
+			.attr('id', id_prefix+'_bracket_path')
+			.attr('d', d_);
+	};
 
 
 	global_ref.vizfin_Base = vizfin_Base;
