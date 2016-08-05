@@ -1,0 +1,67 @@
+<html>
+<head>
+	<meta charset='UTF-8'>
+	<meta name='author' content='becon'>
+	<meta name='description' content='beconae@gmail.com'>
+<!-- CSS -->
+<!-- CSS / Select2 -->
+	<!-- <link href='https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.2/css/select2.min.css' rel='stylesheet'/> -->
+<!-- CSS / Bootstrap -->
+	<link rel='stylesheet' href='http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'>
+	<link rel='stylesheet' href='../lib/bootstrap/bootstrap.min.css'>
+<!-- CSS / Custom -->
+	<link rel='stylesheet' href='../css/becon_graph_web.css'>
+	<link rel='stylesheet' href='../css/app.css'>
+<!-- JavaScript -->
+<!-- JavaScript / jQuery  -->
+	<script src='http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js'></script>
+	<script src='../lib/jquery/jquery.min.js'></script>
+<!-- JavaScript / Bootstrap -->
+	<script src='http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js'></script>
+	<script src='../lib/bootstrap/bootstrap.min.js'></script>
+<!-- JavaScript / D3 -->
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.12/d3.min.js'></script>
+	<script src='../lib/d3/d3.v3.min.js'></script>
+<!-- JavaScript / Queue -->
+	<script src='https://d3js.org/d3-queue.v2.min.js'></script>
+	<script src='../lib/queue/queue.min.js'></script>
+<!-- Fade In Script -->
+</head>
+<body>
+	
+</body>
+<!-- JavaScript / Custom -->
+	<script type='text/javascript' src='../js/VizFin04/VizFin04_StockBeta_AJAX.js'></script>
+	<script type='text/javascript'>
+		'use strict'
+		var vizfin = vizfin || {};
+		var php_raw_data;
+		var php_raw_error;
+		var log_fn = function(e, d){
+			php_raw_error=e; 
+			php_raw_data=d; 
+			console.log(d);
+		};
+		var print_fn = function(e, d){
+			php_raw_error=e; 
+			php_raw_data=d; 
+			console.log(d);
+			document.body.innerHTML += 'DATA:<br>';
+			document.body.innerHTML += JSON.stringify(d);
+			document.body.innerHTML += '<br><br><br>';
+			document.body.innerHTML += 'ERROR:<br>';
+			document.body.innerHTML += e;
+		};
+		window.onload=function() {
+			console.log(vizfin);
+			vizfin.AJAX.get_data_series_id('SEC_MSFT_PRICE_CLOSE', print_fn);
+		}
+	</script>
+</html>
+
+
+
+
+
+
+
