@@ -31,10 +31,13 @@ var vizfin = vizfin || {};
 		return new Date(epoch_date*1000);
 	}
 
-	function StockStats(beta_svg){
+	function StockStats(canvas_holder){
 		this.async_tasks = 0;
 
-		this.BetaChart = new vizfin_.BetaScatterChart(beta_svg);
+		this.BetaChart = new vizfin_.BetaScatterChart(canvas_holder.svg);
+		this.LineChart = new vizfin_.LineChart(canvas_holder.svg);
+		canvas_holder.register_element(this.BetaChart, .5, .5, 0, 0, 'scatter');
+		canvas_holder.register_element(this.LineChart, 1, .5, 0, .5, 'line');
 
 		this.periodicity = periodicity_consts.daily;
 		this.period_diff = 30;
@@ -117,24 +120,47 @@ var vizfin = vizfin || {};
 		this.x_ticker = 'SPY'; // DEBUG
 		this.y_ticker = y_ticker || 'AAPL'; // DEBUG
 	};
-	StockStats.prototype.create_difference_data = function() {
+	StockStats.prototype._create_chart_data = function(x_idx, y_idx) {
 		var sorted_indices = this.raw_data.get_sorted_row_indices('n');
 		var j = this.period_diff;
 		var i = 0;
-		var idx_1, idx_2, row_1, row_2;
-		this.chart_data = [];
-		while ( j < sorted_indices.length ) {
+		var l = sorted_indices.length;
+		var idx_1, idx_2, row_1, row_2, date;
+		var x_0, y_0, x_val, y_val;
+		this.diff_data = [];
+		this.line_data = {
+			'dt': [],
+			'x_val': [],
+			'y_val': []
+		};
+		while ( i < l ) {
+			// Retrieve Earlier Data Point
 			idx_1 = this.raw_data._get_row_index(sorted_indices[i]);
 			if ( this.raw_data.get_row_len_by_idx(idx_1) != 2 ) { i++; j++; continue; }
-			idx_2 = this.raw_data._get_row_index(sorted_indices[j]);
-			if ( this.raw_data.get_row_len_by_idx(idx_2) != 2 ) { i++; j++; continue; }
 			row_1 = this.raw_data.get_row_by_idx(idx_1);
-			row_2 = this.raw_data.get_row_by_idx(idx_2);
-			this.chart_data.push({
-				dt: parse_epoch_date(sorted_indices[j]),
-				x: row_2[0]/row_1[0] - 1,
-				y: row_2[1]/row_1[1] - 1,
-			});
+			// Add Line Data
+			x_val = row_1[x_idx];
+			y_val = row_1[y_idx];
+			if ( x_0 === undefined ) { x_0 = x_val; }
+			if ( y_0 === undefined ) { y_0 = y_val; }
+			this.line_data['dt'].push(parse_epoch_date(sorted_indices[i]));
+			this.line_data['x_val'].push(x_val/x_0);
+			this.line_data['y_val'].push(y_val/y_0);
+			// If Difference Data is Valid
+			if ( j < l )
+			{
+				// If Difference Data is Valid | Retrieve Later Data Point
+				idx_2 = this.raw_data._get_row_index(sorted_indices[j]);
+				if ( this.raw_data.get_row_len_by_idx(idx_2) != 2 ) { i++; j++; continue; }
+				row_2 = this.raw_data.get_row_by_idx(idx_2);
+				// If Difference Data is Valid | Push Difference Data
+				this.diff_data.push({
+					dt: parse_epoch_date(sorted_indices[j]),
+					x: row_2[x_idx]/row_1[x_idx] - 1,
+					y: row_2[y_idx]/row_1[y_idx] - 1,
+				});
+			}
+			// Advance Indices
 			i++;
 			j++;
 		}
@@ -156,8 +182,9 @@ var vizfin = vizfin || {};
 				y_data.forEach(function(d){
 					this_.raw_data.add_entry_by_name_idx(d[0], y_idx, +d[1]);
 				});
-				this_.create_difference_data();
-				this_.BetaChart.add_data(this_.chart_data);
+				this_._create_chart_data(x_idx, y_idx);
+				this_.BetaChart.add_data(this_.diff_data);
+				this_.LineChart.add_data(this_.line_data);
 			});
 		// vizfin_.AJAX.get_data_series_history(this._x_source_id, function(error, data){
 		// 	data.forEach(function(d){

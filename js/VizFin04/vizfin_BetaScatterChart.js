@@ -1,32 +1,30 @@
 'use strict'
 var vizfin = vizfin || {};
 
-(function(global_ref){
+(function(vizfin_){
 	//////////////////////////////////////////////////////////////////////////////
 	// CHART CONSTANTS
 	//////////////////////////////////////////////////////////////////////////////
-	var CHART_MARGINS = { top: 20, right: 20, bottom: 20, left: 20 };
+	var CHART_MARGINS = { top: 4, rght: 2, btm: 2, left: 6 };
 	//////////////////////////////////////////////////////////////////////////////
 	// CHART DEFINITION
 	//////////////////////////////////////////////////////////////////////////////
 	var BetaScatterChart = function(svg_) {
-		this.svg = svg_;
-		var svg_width_ = this.svg.attr('width') || 0;
-		var svg_height_ = this.svg.attr('height') || 0;
-		var svg_group = this.svg
+		var svg_width_ = svg_.attr('width') || 0;
+		var svg_height_ = svg_.attr('height') || 0;
+		this.svg_group = svg_
 			.append('g')
 				.classed('scatter_chart_g', true);
-		this.chart_area = svg_group
+		this.chart_area = this.svg_group
 			.append('g')
 				.classed('chart_g', true)
-				.attr('transform', 'translate('+CHART_MARGINS.left+','+CHART_MARGINS.top+')')
-			;
+				.attr('transform', 'translate('+CHART_MARGINS.left+','+CHART_MARGINS.top+')');
 		this.chart_data = [];
 		// Add Scales
 		this.x_scale = d3.scale.linear()
-			.range([0, svg_width_ - CHART_MARGINS.right - CHART_MARGINS.left]);
+			.range([0, svg_width_ - CHART_MARGINS.rght - CHART_MARGINS.left]);
 		this.y_scale = d3.scale.linear()
-			.range([svg_height_ - CHART_MARGINS.bottom - CHART_MARGINS.top, 0]);
+			.range([svg_height_ - CHART_MARGINS.btm - CHART_MARGINS.top, 0]);
 		// Add Axes
 		this.x_axis = d3.svg.axis()
 			.orient('bottom')
@@ -34,10 +32,10 @@ var vizfin = vizfin || {};
 		this.y_axis = d3.svg.axis()
 			.orient('left')
 			.scale(this.y_scale);
-		this.x_axis_svg = svg_group
+		this.x_axis_svg = this.svg_group
 			.append('g')
 			.classed('axis', true);
-		this.y_axis_svg = svg_group
+		this.y_axis_svg = this.svg_group
 			.append('g')
 			.classed('axis', true);
 		// Add Points Holder
@@ -47,7 +45,7 @@ var vizfin = vizfin || {};
 			.classed('point', true);
 	};
 	BetaScatterChart.prototype.add_data = function(raw_data_) {
-		// this.chart_data = global_ref.Help.get_ScatterChart_testData(); // DEBUG
+		// this.chart_data = vizfin_.Help.get_ScatterChart_testData(); // DEBUG
 		this.chart_data = raw_data_;
 		// Redefine Scale Domains
 		// Doing this here, and not in every re-draw, for efficiency reasons.
@@ -72,18 +70,21 @@ var vizfin = vizfin || {};
 		// Do nothing. Here for calibrate_canvas function
 	};
 	BetaScatterChart.prototype.redefine_y_scale_range = function(svg_height_) {
-		this.y_scale.range([svg_height_ - CHART_MARGINS.bottom - CHART_MARGINS.top, 0]);
+		this.y_scale.range([svg_height_ - CHART_MARGINS.btm - CHART_MARGINS.top, 0]);
 		this.x_axis_svg
 			.attr('transform', 'translate('+CHART_MARGINS.left+','+(svg_height_/2)+')');
 		this.x_axis_svg.call(this.x_axis);
 		this.y_axis_svg.call(this.y_axis);
 		this.draw();
 	};
+	BetaScatterChart.prototype.redefine_location = function(x_loc, y_loc) {
+		this.svg_group.attr('transform', 'translate('+x_loc+','+y_loc+')');
+	};
 	BetaScatterChart.prototype.redefine_x_scale_domain = function() {
 		// Do nothing. Here for calibrate_canvas function
 	};
 	BetaScatterChart.prototype.redefine_x_scale_range = function(svg_width_) {
-		this.x_scale.range([0, svg_width_ - CHART_MARGINS.right - CHART_MARGINS.left]);
+		this.x_scale.range([0, svg_width_ - CHART_MARGINS.rght - CHART_MARGINS.left]);
 		this.y_axis_svg
 			.attr('transform', 'translate('+(svg_width_/2)+','+CHART_MARGINS.top+')');
 		this.x_axis_svg.call(this.x_axis);
@@ -130,7 +131,7 @@ var vizfin = vizfin || {};
 		this.points.exit().remove();
 	};
 
-	global_ref.BetaScatterChart = BetaScatterChart;
+	vizfin_.BetaScatterChart = BetaScatterChart;
 
 })(vizfin);
 

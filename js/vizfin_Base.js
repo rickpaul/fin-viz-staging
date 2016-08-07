@@ -45,6 +45,9 @@ var vizfin = vizfin || {};
 	vizfin_Base.prototype.redefine_translation = function(width_, height_) {
 		return; 
 	};
+	vizfin_Base.prototype.redefine_location = function(x_loc, y_loc) {
+		this.svg_group.attr('transform', 'translate('+x_loc+','+y_loc+')');
+	};
 
 	vizfin_Base.prototype.clear = function() {
 		d3.selectAll('.grouping').remove();
