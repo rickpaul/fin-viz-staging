@@ -1,0 +1,130 @@
+<html>
+<head>
+	<meta charset='utf-8'/>
+	<meta name='author' content='Rickpaul Dhindsa'/>
+	<meta name='description' content='captainindia@gmail.com'>
+
+	<!-- JavaScript / jQuery  -->
+	<script src='http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js'></script>
+	<script src='../lib/jquery/jquery.min.js'></script>
+	<!-- JavaScript / d3  -->
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.12/d3.min.js'></script>
+	<script src='../lib/d3/d3.v3.min.js'></script>
+	<!-- JavaScript / underscore  -->
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js'></script>
+	<script src='../lib/underscore/underscore.min.js'></script>
+	<!-- JavaScript / convnet  -->
+	<script src='../lib/convnetjs/convnet.min.js'></script>
+	<script src='../lib/convnetjs/ga.js'></script>
+
+	<!-- CSS / Bootstrap -->
+	<link rel='stylesheet' href='http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'>
+	<link rel='stylesheet' href='../lib/bootstrap/bootstrap.min.css'>
+	<!-- CSS / Custom -->
+	<link rel='stylesheet' href='../css/econlab.css'></link>
+	<link rel='stylesheet' href='../css/vizfin_blog.css'></link>
+
+	<script> setTimeout(function(){$('body').fadeIn(500);},0); </script>
+</head>
+<body data-spy='scroll' data-target='.navbar-collapse'>
+	
+	<!-- Navigation -->
+	<nav class='navbar navbar-inverse navbar-fixed-top' role='navigation'>
+		<div class='container'>
+			<!-- Brand and toggle get grouped for better mobile display -->
+			<div class='navbar-header'>
+				<button type='button' class='navbar-toggle' data-toggle='collapse' data-target='#bs-example-navbar-collapse-1'>
+					<span class='sr-only'>Toggle navigation</span>
+					<span class='icon-bar'></span>
+					<span class='icon-bar'></span>
+					<span class='icon-bar'></span>
+				</button>
+				<a class='navbar-brand' href='../blog-home.html'>VizFin</a>
+			</div>
+			<!-- Collect the nav links, forms, and other content for toggling -->
+			<div class='collapse navbar-collapse' id='bs-example-navbar-collapse-1'>
+				<ul class='nav navbar-nav'>
+					<li>
+						<a href='../blog-about.html'>About</a>
+					</li>
+					<li>
+						<a href='../blog-contact.html'>Contact</a>
+					</li>
+				</ul>
+			</div>
+			<!-- /.navbar-collapse -->
+		</div>
+		<!-- /.container -->
+	</nav>
+	<div>
+		<div id='canvas_holder'>
+		</div>
+		<div id='sd_chart_holder'>
+		</div>
+		<div class='button_column'>
+			<a class='margin_btn' id='btn_reset_sim'>
+				<input class='margin_btn' type='button' value='Repopulate' id='btn_reset_sim_input'>
+			</a>
+			<a class='margin_btn' id='btn_step_sim'>
+				<input class='margin_btn' type='button' value='Step' id='btn_step_sim_input'>
+			</a>
+			<a class='margin_btn' id='btn_run_sim'>
+				<input class='margin_btn' type='button' value='Run' id='btn_run_sim_input'>
+			</a>
+			<a class='margin_btn' id='btn_stop_sim'>
+				<input class='margin_btn' type='button' value='Stop' id='btn_stop_sim_input'>
+			</a>
+		</div>
+	</div>
+</body>
+<!-- JavaScript / custom  -->
+	<script src='../lib/_custom/custom_queue.js'></script>
+	<script src='../lib/_custom/custom_vector.js'></script>
+	<script src='../lib/_custom/custom_math.js'></script>
+	<script src='../js/EconLab02/econlab_Shop.js'></script>
+	<script src='../js/EconLab02/econlab_Shop_Price_Brain.js'></script>
+	<script src='../js/EconLab02/econlab_Citizen.js'></script>
+	<script src='../js/EconLab02/econlab_Transaction.js'></script>
+	<script src='../js/EconLab02/econlab_Trainer.js'></script>
+	<script src='../js/EconLab02/econlab_Simulation.js'></script>
+	<script src='../js/EconLab02/econlab_SupplyDemandChart.js'></script>
+	<script src='../js/EconLab02/econlab_Web.js'></script>
+	<script src='../js/EconLab02/econlab.js'></script>
+	<script type='text/javascript'>
+		'use strict'
+		document.onload = (function(d3, undefined){
+
+			function setup(){
+				// Create Canvases
+				var sim_svg = d3.select('#canvas_holder').append('svg');
+				var sd_svg = d3.select('#sd_chart_holder').append('svg');
+				// Create Simulation
+				Simulation_ = new Simulation(sim_svg, sd_svg);
+				Simulation_.populate();
+				// Create Key Listeners
+				// d3.select('body')	
+					// .on('keydown', function(){Simulation_.handle_keydown.call(Simulation_);});
+				window.onresize = function(){calibrate_canvases();}
+				calibrate_canvases();
+			};
+
+			function register_buttons() {
+				$('#btn_run_sim').on('click', WEB_run_simulation());
+				$('#btn_stop_sim').on('click', WEB_stop_simulation());
+				$('#btn_step_sim').on('click', WEB_step_simulation());
+				$('#btn_reset_sim').on('click', WEB_reset_simulation());
+			}
+
+			function main(){
+				setup();
+				register_buttons();
+			}
+
+			main();
+			Simulation_.display();
+			console.log('Simulation Loaded: ');
+			console.log(Simulation_);
+
+		})(window.d3);
+	</script>
+</html>

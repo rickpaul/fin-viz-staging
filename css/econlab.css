@@ -1,0 +1,116 @@
+/*TODO: input:focus (and input:hover) not working.*/
+
+svg {
+	background-color: #DDD;
+	cursor: default;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	-o-user-select: none;
+	user-select: none;
+}
+
+div {
+	padding: 0;
+	margin: 0;
+	overflow: hidden;
+	float: left;
+}
+div.row {
+	display: inline-block;
+	vertical-align: top;
+}
+div.button_column {
+	margin-left: 20;
+	display: inline-block;
+	vertical-align: top;
+}
+
+text {
+	font: 9px sans-serif;
+	pointer-events: none;
+}
+text.hidden {
+	font-size: 0px;
+}
+text.shop_info {
+	font-size: 14px;
+	font-family: monospace;
+}
+
+
+
+p {
+	font: 10px sans-serif;
+	display: inline;
+}
+
+path {
+	fill: none;
+}
+
+path.supply_line {
+	stroke: #F00;
+	stroke-width: 2px;
+}
+
+path.demand_line {
+	stroke: #00F;
+	stroke-width: 2px;
+}
+
+.axis line,
+.axis path {
+	stroke: #222;
+	shape-rendering: crispEdges;
+}
+
+.axis text {
+	/*text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;*/
+	stroke: #222;
+	shape-rendering: crispEdges;
+}
+
+rect.hist_bar {
+	stroke-width: 0px;
+	fill-opacity: .6;
+}
+rect.supply_bar {
+	fill: #F03;
+}
+rect.demand_bar {
+	fill: #30F;
+}
+
+
+a.margin_btn{
+	margin-top: 5px; /*margin-top not working.*/
+	margin-bottom: 0px;
+	margin-right: 0px;
+	margin-left: 5px;
+	padding: 0;
+}
+button {
+	font: inherit;
+	color: inherit;
+	background: inherit;
+	overflow: visible;
+}
+input {
+	border: 1px dotted #222; 
+	font: 16px;
+	color: black;
+}
+input.margin_btn {
+	width: 80px;
+	background: #999; 
+}
+input.disabled {
+	background: #966; 
+}
+/*input:focus not working.*/
+input:hover { 
+	outline: none;
+}
+
+
