@@ -47,8 +47,8 @@ var vizfin = vizfin || {};
 			.classed('point', true);
 	};
 	BetaScatterChart.prototype.add_data = function(raw_data_) {
-		this.chart_data = global_ref.Help.get_ScatterChart_testData(); // DEBUG
-		// this.chart_data = raw_data_;
+		// this.chart_data = global_ref.Help.get_ScatterChart_testData(); // DEBUG
+		this.chart_data = raw_data_;
 		// Redefine Scale Domains
 		// Doing this here, and not in every re-draw, for efficiency reasons.
 		var extent = d3.extent(this.chart_data.map(function(d){return d.x;}));
@@ -91,7 +91,6 @@ var vizfin = vizfin || {};
 		this.draw();
 	};
 	BetaScatterChart.prototype.draw = function() {
-		console.log('draw'); // DEBUG
 		var this_ = this;
 		this.points = this.points.data(this.chart_data);
 		// Place Circle Locations
@@ -121,6 +120,11 @@ var vizfin = vizfin || {};
 					return 'red';
 				}
 			})
+			.on('mousedown', function(d){
+				console.log(d.dt);
+				console.log(d.x);
+				console.log(d.y);
+			});
 		;
 
 		this.points.exit().remove();

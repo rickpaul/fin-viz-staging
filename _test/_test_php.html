@@ -53,8 +53,8 @@
 			document.body.innerHTML += e;
 		};
 		window.onload=function() {
-			console.log(vizfin);
-			vizfin.AJAX.get_data_series_id('SEC_MSFT_PRICE_CLOSE', print_fn);
+			// vizfin.AJAX.get_data_series_id('SEC_MSFT_PRICE_CLOSE', print_fn);
+			vizfin.AJAX.get_data_series_history('7', print_fn);
 		}
 	</script>
 </html>

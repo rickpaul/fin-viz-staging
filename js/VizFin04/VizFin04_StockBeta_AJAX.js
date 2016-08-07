@@ -48,38 +48,11 @@ var vizfin = vizfin || {};
 	// Specific Code
 	//////////////////////////////////////////////////////////////////////////////
 	var get_data_series_history = function(seriesID, callback) {
-		$.ajax({
-				url: phpMySQLPrefix + 'get_data_series_history.php',
-				data: {
-					seriesID: seriesID
-				},
-				type: 'POST',
-				dataType: 'JSON',
-				cache: false
-			})
-			.done(function(data){
-				if(data.error){
-					console.log(data.error);
-					callback(data.error, null);
-				} else if(typeof(data.results) !== 'undefined') {
-					var chart_data = [];
-					data.results.forEach(function(d) {
-						chart_data.push({
-							date: parse_epoch_date(d[0]),
-							value: +d[1],
-						});
-					});
-					callback(null, chart_data);
-				} else if(typeof(data.results) === 'undefined') {
-					console.log('Data Results not recognized');
-					callback('Data Results not recognized', null);
-				}
-			})
-			.fail(function(error){
-				console.log(error);
-				callback(error.responseText, null);
-			})
-		;
+		var url = phpMySQLPrefix + 'get_data_series_history.php';
+		var data = {
+			seriesID: seriesID
+		};
+		AJAX_Simple_Call(url, data, callback);
 	}
 
 	var get_data_series_id = function(seriesTicker, callback) {

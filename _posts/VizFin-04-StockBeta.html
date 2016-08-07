@@ -1,0 +1,94 @@
+<html>
+<head>
+	<meta charset='utf-8'/>
+	<meta name='author' content='Rickpaul Dhindsa'/>
+	<meta name='description' content='beconae@gmail.com'>
+	<meta http-equiv='X-UA-Compatible' content='IE=edge'>
+	<meta name='viewport' content='width=device-width, initial-scale=1'>
+	<!-- CSS / Bootstrap -->
+	<link rel='stylesheet' href='http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css'>
+	<link rel='stylesheet' href='../lib/bootstrap/bootstrap.min.css'>
+	<!-- CSS / Custom -->
+	<link rel='stylesheet' href='../css/vizfin.css'></link>
+	<link rel='stylesheet' href='../css/vizfin_blog.css'></link>
+	<!-- JavaScript / jQuery  -->
+	<script src='http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js'></script>
+	<script src='../lib/jquery/jquery.min.js'></script>
+	<!-- JavaScript / d3  -->
+	<script src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.12/d3.min.js'></script>
+	<script src='../lib/d3/d3.v3.min.js'></script>
+	<!-- JavaScript / Bootstrap -->
+	<script src='http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js'></script>
+	<script src='../lib/bootstrap/bootstrap.min.js'></script>
+<!-- JavaScript / Queue -->
+	<script src='https://d3js.org/d3-queue.v2.min.js'></script>
+	<script src='../lib/queue/queue.min.js'></script>
+	<script> setTimeout(function(){$('body').fadeIn(500);},0); </script>
+</head>
+<body data-spy='scroll' data-target='.navbar-collapse'>
+	
+	<!-- Navigation -->
+	<nav class='navbar navbar-inverse navbar-fixed-top' role='navigation'>
+		<div class='container'>
+			<!-- Brand and toggle get grouped for better mobile display -->
+			<div class='navbar-header'>
+				<button type='button' class='navbar-toggle' data-toggle='collapse' data-target='#bs-example-navbar-collapse-1'>
+					<span class='sr-only'>Toggle navigation</span>
+					<span class='icon-bar'></span>
+					<span class='icon-bar'></span>
+					<span class='icon-bar'></span>
+				</button>
+				<a class='navbar-brand' href='../blog-home.html'>VizFin</a>
+			</div>
+			<!-- Collect the nav links, forms, and other content for toggling -->
+			<div class='collapse navbar-collapse' id='bs-example-navbar-collapse-1'>
+				<ul class='nav navbar-nav'>
+					<li>
+						<a href='../blog-about.html'>About</a>
+					</li>
+					<li>
+						<a href='../blog-contact.html'>Contact</a>
+					</li>
+				</ul>
+			</div>
+			<!-- /.navbar-collapse -->
+		</div>
+		<!-- /.container -->
+	</nav>
+
+	<!-- Content -->
+	<div class='display-container' id='viz_holder'>
+	</div>
+</body>
+<!-- JavaScript / custom  -->
+	<script src='../lib/_custom/Matrix_Dictionary.js'></script>
+	<script src='../lib/_custom/custom_math.js'></script>
+	<script src='../js/vizfin_Help.js'></script>
+	<script src='../js/vizfin_Display.js'></script>
+	<script src='../js/VizFin04/vizfin_BetaScatterChart.js'></script>
+	<script src='../js/VizFin04/VizFin04_StockBeta_AJAX.js'></script>
+	<script src='../js/VizFin04/VizFin04_StockBeta.js'></script>
+	<script type='text/javascript'>
+		'use strict'
+		var vizfin = vizfin || {};
+		var display; // keep outside for debugging
+		var runner; // keep outside for debugging
+		document.onload = (function(vizfin, d3, undefined) {
+			console.log('document loaded');
+			var svg_width = 400;
+			var svg_height = 300;
+			var svg = d3.select('#viz_holder')
+				.append('svg')
+					.attr('width', svg_width)
+					.attr('height', svg_height)
+					.classed('background', true)
+					.classed('margin-top', true);
+			// Create Display
+			runner = new vizfin.StockStats(svg);
+			display = runner.BetaChart;
+			window.onresize = function(){vizfin.calibrate_canvas(display);};
+			// Start 
+			vizfin.calibrate_canvas(display);
+		})(vizfin, window.d3);
+	</script>
+</html>

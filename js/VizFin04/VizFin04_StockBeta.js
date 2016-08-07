@@ -21,10 +21,21 @@ var vizfin = vizfin || {};
 	};
 	// TODO: Make sure syncs up with YQL/Python
 	function convert_ticker(sec_ticker){
-		return 'SEC_'+sec_ticker+'_PRICE_CLOSE'
+		return 'SEC_'+sec_ticker+'_PRICE_ADJ_CLOSE'
+	}
+	function parse_epoch_date(epoch_date) {
+		/*
+			in: an epoch date
+			ret: a Date Object
+		*/
+		return new Date(epoch_date*1000);
 	}
 
 	function StockStats(beta_svg){
+		this.async_tasks = 0;
+
+		this.BetaChart = new vizfin_.BetaScatterChart(beta_svg);
+
 		this.periodicity = periodicity_consts.daily;
 		this.period_diff = 30;
 		this._x_ticker = null;
@@ -41,14 +52,19 @@ var vizfin = vizfin || {};
 				this._x_ticker = value;
 				this._x_db_ticker = convert_ticker(value);
 				var this_ = this;
-				vizfin_.get_data_series_id(value, function(error, source_id){
-					if(error) { this_._errors.push(['load x_source_id', error]); }
-					if(source_id === null) { 
-						this_._errors.push(['load x_source_id', 'source id not found']); 
-					} else {
-						this_._x_source_id = +source_id;	
-					}
-				})
+				queue()
+					.defer(function(callback){this_.increment_task_count.call(this_, callback);})
+					.defer(vizfin_.AJAX.get_data_series_id, this._x_db_ticker)
+					.await(function(error, task_action, source_id){
+						if(error) { this_._errors.push(['load x_source_id', error]); }
+						if(source_id === null) { 
+							this_._errors.push(['load x_source_id', 'source id not found']); 
+						} else {
+							this_._x_source_id = +source_id;	
+						}
+						this_.decrement_task_count.call(this_);
+					})
+				;
 			},
 		});
 		Object.defineProperty(this, 'y_ticker', {
@@ -56,44 +72,109 @@ var vizfin = vizfin || {};
 				this._y_ticker = value;
 				this._y_db_ticker = convert_ticker(value);
 				var this_ = this;
-				vizfin_.get_data_series_id(value, function(error, source_id){
-					if(error) { this_._errors.push(['load y_source_id', error]); }
-					if(source_id === null) { 
-						this_._errors.push(['load y_source_id', 'source id not found']); 
-					} else {
-						this_._y_source_id = +source_id;	
-					}
-				})
+				queue()
+					.defer(function(callback){this_.increment_task_count.call(this_, callback);})
+					.defer(vizfin_.AJAX.get_data_series_id, this._y_db_ticker)
+					.await(function(error, task_action, source_id){
+						if(error) { this_._errors.push(['load y_source_id', error]); }
+						if(source_id === null) { 
+							this_._errors.push(['load y_source_id', 'source id not found']); 
+						} else {
+							this_._y_source_id = +source_id;	
+						}
+						this_.decrement_task_count.call(this_);
+					})
+				;
 			},
 		});
 	};
 	StockStats.prototype.constructor = StockStats;
+	StockStats.prototype.increment_task_count = function(callback) {
+		if(this.async_tasks === 0){
+			$('#txt-status').text('Loading...'); // Change this.
+		}
+		this.async_tasks+=1;
+		console.log('++ASYNC TASKS: ' + this.async_tasks); // DEBUG
+		if(callback){callback(null, 1);}
+	};
+	StockStats.prototype.decrement_task_count = function(callback) {
+		this.async_tasks-=1;
+		if(this.async_tasks === 0){
+			$('#txt-status').text('Finished!');
+		}
+		console.log('--ASYNC TASKS: ' + this.async_tasks); // DEBUG
+		if(callback){callback(null, -1);}
+	};
 	StockStats.prototype.get_negative_trend_line = function(start_y, end_y) {
 
 	};
 	StockStats.prototype.get_positive_trend_line = function(start_y, end_y) {
 
 	};
-	StockStats.prototype.load_data = function() {
-		// 1) Set x_ticker, y_ticker,
-		this.x_ticker = 'SEC_SPY_PRICE_CLOSE'; // DEBUG
-		this.y_ticker = 'SEC_AAPL_PRICE_CLOSE'; // DEBUG
-		// 2) Load data into Matrix Dictionary
-		this.data_ = new Matrix_Dictionary();
-		var x_idx = this.data_.add_col('x');
-		var y_idx = this.data_.add_col('y');
-		vizfin_.get_data_series_history(this._x_source_id, function(d){
-			
-		})
 
-		// 3) Achieve Data Differentiation over time
+	StockStats.prototype.set_tickers = function(y_ticker) {
+		// 1) Set x_ticker, y_ticker,
+		this.x_ticker = 'SPY'; // DEBUG
+		this.y_ticker = y_ticker || 'AAPL'; // DEBUG
+	};
+	StockStats.prototype.create_difference_data = function() {
+		var sorted_indices = this.raw_data.get_sorted_row_indices('n');
+		var j = this.period_diff;
+		var i = 0;
+		var idx_1, idx_2, row_1, row_2;
+		this.chart_data = [];
+		while ( j < sorted_indices.length ) {
+			idx_1 = this.raw_data._get_row_index(sorted_indices[i]);
+			if ( this.raw_data.get_row_len_by_idx(idx_1) != 2 ) { i++; j++; continue; }
+			idx_2 = this.raw_data._get_row_index(sorted_indices[j]);
+			if ( this.raw_data.get_row_len_by_idx(idx_2) != 2 ) { i++; j++; continue; }
+			row_1 = this.raw_data.get_row_by_idx(idx_1);
+			row_2 = this.raw_data.get_row_by_idx(idx_2);
+			this.chart_data.push({
+				dt: parse_epoch_date(sorted_indices[j]),
+				x: row_2[0]/row_1[0] - 1,
+				y: row_2[1]/row_1[1] - 1,
+			});
+			i++;
+			j++;
+		}
+	};
+	StockStats.prototype.load_data = function() {
+		if (this.async_tasks != 0) {return;}
+		// 2) Load data into Matrix Dictionary
+		this.raw_data = new becon_Graph.Matrix_Dictionary();
+		var x_idx = this.raw_data.add_col('x');
+		var y_idx = this.raw_data.add_col('y');
+		var this_ = this;
+		queue()
+			.defer(vizfin_.AJAX.get_data_series_history, this._x_source_id)
+			.defer(vizfin_.AJAX.get_data_series_history, this._y_source_id)
+			.await(function(errors, x_data, y_data) {
+				x_data.forEach(function(d){
+					this_.raw_data.add_entry_by_name_idx(d[0], x_idx, +d[1]);
+				});
+				y_data.forEach(function(d){
+					this_.raw_data.add_entry_by_name_idx(d[0], y_idx, +d[1]);
+				});
+				this_.create_difference_data();
+				this_.BetaChart.add_data(this_.chart_data);
+			});
+		// vizfin_.AJAX.get_data_series_history(this._x_source_id, function(error, data){
+		// 	data.forEach(function(d){
+		// 		this_.raw_data.add_entry_by_name_idx(d[0], x_idx, d[1]);
+		// 	});
+		// });
+		// vizfin_.AJAX.get_data_series_history(this._y_source_id, function(error, data){
+		// 	data.forEach(function(d){
+		// 		this_.raw_data.add_entry_by_name_idx(d[0], y_idx, d[1]);
+		// 	});
+		// });
+		// 3) Do Data Differentiation over time
+
 		// 3) (Any way to verify that the time has no gaps?)
 		// 4) Send differentiated data to chart
 		// 5) Create and draw trend lines
 		// 6) Solve for option equivalence
-
-	};
-	StockStats.prototype.load_data = function() {
 
 	};
 
