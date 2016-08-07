@@ -14,26 +14,18 @@ var vizfin = vizfin || {};
 	var brace_width = 28;
 	var brace_space = 5;
 
-	////////////////////////////////////////////////////////////////////////
-	// FCFF DISPLAY Definition 
-	////////////////////////////////////////////////////////////////////////
-	var BS_Display = function(svg_) {
-		////////////////////////////////////////////////////////////////////////
-		// FCFF DISPLAY Variables 
-		////////////////////////////////////////////////////////////////////////
-		// Display Variables
-		this.svg = svg_;
-		this.svg_group = this.svg
-			.append('g')
-			.attr('transform', 'translate('+MARGINS.left+','+MARGINS.top+')')
-			.classed('BS_Display', true);
-		this.x_scale = d3.scale.linear().domain([0,1]).range([0,1]);
-		this.y_scale = d3.scale.linear().domain([0,1]).range([0,1]);
 
-		this._rght_offset = 0;
-		this._left_offset = 0;
-
-		// Financial Variables
+	////////////////////////////////////////////////////////////////////////
+	// BS_Display Constructor 
+	////////////////////////////////////////////////////////////////////////
+	function BS_Display(svg_) {
+		////////////////////////////////////////////////////////////////////////
+		// Call Super-Constructor
+		////////////////////////////////////////////////////////////////////////
+		vizfin.vizfin_Base.call(this, svg_);
+		////////////////////////////////////////////////////////////////////////
+		// Financial Variables 
+		////////////////////////////////////////////////////////////////////////
 		// Financial Variables / Assets
 		// Financial Variables / Assets / Current Assets
 		this._cash_and_cash_equivalents = 400;
@@ -486,26 +478,26 @@ var vizfin = vizfin || {};
 				};
 			},
 		});
-		Object.defineProperty(this, 'other_current_liabilities_pos', {
-			get: function() { 
-				return {
-					top: this.other_current_liabilities_pos.btm,
-					btm: this.other_current_liabilities_pos.btm+this.other_current_liabilities,
-					left: this.rect_width/2,
-					rght: this.rect_width
-				};
-			},
-		});
-		Object.defineProperty(this, 'other_current_liabilities_pos', {
-			get: function() { 
-				return {
-					top: this.other_current_liabilities_pos.btm,
-					btm: this.other_current_liabilities_pos.btm+this.other_current_liabilities,
-					left: this.rect_width/2,
-					rght: this.rect_width
-				};
-			},
-		});
+		// Object.defineProperty(this, 'other_current_liabilities_pos', {
+		// 	get: function() { 
+		// 		return {
+		// 			top: this.other_current_liabilities_pos.btm,
+		// 			btm: this.other_current_liabilities_pos.btm+this.other_current_liabilities,
+		// 			left: this.rect_width/2,
+		// 			rght: this.rect_width
+		// 		};
+		// 	},
+		// });
+		// Object.defineProperty(this, 'other_current_liabilities_pos', {
+		// 	get: function() { 
+		// 		return {
+		// 			top: this.other_current_liabilities_pos.btm,
+		// 			btm: this.other_current_liabilities_pos.btm+this.other_current_liabilities,
+		// 			left: this.rect_width/2,
+		// 			rght: this.rect_width
+		// 		};
+		// 	},
+		// });
 		// Object.defineProperty(this, 'other_current_assets_pos', {
 		// 	get: function() { 
 		// 		return {
@@ -519,26 +511,23 @@ var vizfin = vizfin || {};
 		Object.defineProperty(this, 'rect_width', {
 			get: function() { return width; },
 		});
-
 	};
-
+	BS_Display.prototype = Object.create(vizfin.vizfin_Base.prototype);
+	BS_Display.prototype.constructor = BS_Display;
 	////////////////////////////////////////////////////////////////////////
 	// FCFF DISPLAY Prototype Functions 
 	////////////////////////////////////////////////////////////////////////
 	BS_Display.prototype.redefine_y_scale_domain = function() {
-		this.y_scale.domain([0, this.total_assets]);
-	};
-	BS_Display.prototype.redefine_x_scale_domain = function() {
-		return;
+		this.y_scale
+			.domain([0, this.total_assets]);
 	};
 	BS_Display.prototype.redefine_y_scale_range = function(height_) {
-		this.y_scale.range([0, height_ - MARGINS.top - MARGINS.btm])
-	};
-	BS_Display.prototype.redefine_x_scale_range = function(width_) {
-		return;
+		this.y_scale
+			.range([0, height_ - MARGINS.top - MARGINS.btm]);
 	};
 	BS_Display.prototype.redefine_translation = function(width_, height_) {
-		return; 
+		this.svg_group
+			.attr('transform', 'translate('+(MARGINS.left+this._left_offset*(brace_width + brace_space))+','+MARGINS.top+')');
 	};
 	BS_Display.prototype.draw_rects = function() {
 		// Draw Backgrounds
@@ -547,37 +536,37 @@ var vizfin = vizfin || {};
 		this.draw_rect(this.svg_group, this.total_equities_pos, 'total_equities');
 		// Draw Assets
 		if(this.cash_and_cash_equivalents > 0) { 
-			this.draw_rect(this.svg_group, this.cash_pos, 'cash', 'Cash + Equivalents'); 
+			this.draw_rect(this.svg_group, 'cash', this.cash_pos, 'Cash + Equivalents'); 
 		}
 		if(this.short_term_investments > 0) { 
-			this.draw_rect(this.svg_group, this.short_term_investments_pos, 'short_term_investments', 'Short Term Investments');
+			this.draw_rect(this.svg_group, 'short_term_investments', this.short_term_investments_pos, 'Short Term Investments');
 		}
 		if(this.accounts_receivable > 0) { 
-			this.draw_rect(this.svg_group, this.accts_receivable_pos, 'accts_receivable', 'Accounts Rec.');
+			this.draw_rect(this.svg_group, 'accts_receivable', this.accts_receivable_pos, 'Accounts Rec.');
 		}
 		if(this.inventory > 0) { 
-			this.draw_rect(this.svg_group, this.inventory_pos, 'inventory', 'Inventory');
+			this.draw_rect(this.svg_group, 'inventory', this.inventory_pos, 'Inventory');
 		}
 		if(this.other_current_assets > 0) { 
-			this.draw_rect(this.svg_group, this.other_current_assets_pos, 'other_current_assets', 'Other Current Assets');
+			this.draw_rect(this.svg_group, 'other_current_assets', this.other_current_assets_pos, 'Other Current Assets');
 		}
 		if(this.long_term_investments > 0) { 
-			this.draw_rect(this.svg_group, this.long_term_investments_pos, 'long_term_investments', 'Long Term Investments');
+			this.draw_rect(this.svg_group, 'long_term_investments', this.long_term_investments_pos, 'Long Term Investments');
 		}
 		if(this.property_plant_equipment > 0) { 
-			this.draw_rect(this.svg_group, this.property_plant_equipment_pos, 'property_plant_equipment', 'PP&E');
+			this.draw_rect(this.svg_group, 'property_plant_equipment', this.property_plant_equipment_pos, 'PP&E');
 		}
 		if(this.goodwill > 0) { 
-			this.draw_rect(this.svg_group, this.goodwill_pos, 'goodwill', 'Goodwill');
+			this.draw_rect(this.svg_group, 'goodwill', this.goodwill_pos, 'Goodwill');
 		}
 		if(this.intangible_assets < 0) { 
-			this.draw_rect(this.svg_group, this.intangible_assets_pos, 'intangible_assets', 'Intangible Assets');
+			this.draw_rect(this.svg_group, 'intangible_assets', this.intangible_assets_pos, 'Intangible Assets');
 		}
 		if(this.miscellaneous_assets < 0) { 
-			this.draw_rect(this.svg_group, this.miscellaneous_assets_pos, 'miscellaneous_assets', 'Misc. Assets');
+			this.draw_rect(this.svg_group, 'miscellaneous_assets', this.miscellaneous_assets_pos, 'Misc. Assets');
 		}
 		if(this.deferred_long_term_liability_charges < 0) { 
-			this.draw_rect(this.svg_group, this.deferred_long_term_liability_charges_pos, 'deferred_long_term_liability_charges', 'Deferred Liability Charges');
+			this.draw_rect(this.svg_group, 'deferred_long_term_liability_charges', this.deferred_long_term_liability_charges_pos, 'Deferred Liability Charges');
 		}
 	};
 	BS_Display.prototype.draw_labels = function() {
@@ -585,31 +574,31 @@ var vizfin = vizfin || {};
 		this.draw_external_label(this.svg_group, this.total_liabilities_pos, 'liabilities', 'Liabilities', false);
 		this.draw_external_label(this.svg_group, this.total_equities_pos, 'equity', 'Equity', false, true);
 	};
-	BS_Display.prototype.draw_rect = function(parent_element, position_dict, id_prefix, text) {
-		var l_ = position_dict.left;
-		var t_ = position_dict.top;
-		var r_ = position_dict.rght;
-		var b_ = position_dict.btm;
-		var tor_ = position_dict.text_offset_rght || 0;
-		var tod_ = position_dict.text_offset_down || 0;
-		var group = parent_element.append('g')
-			.attr('id', id_prefix+'_g')
-			.attr('transform', 'translate('+this.x_scale(l_)+','+this.y_scale(t_)+')')
-		group.append('rect')
-			.attr('width', this.x_scale(r_ - l_))
-			.attr('height', this.y_scale(b_ - t_))
-			.attr('x', 0)
-			.attr('y', 0)
-			.attr('id', id_prefix+'_rect');
-		if(text) {
-			group.append('text')
-				.attr('transform', 'translate('+this.x_scale((r_ - l_)/2+tor_)+','+this.y_scale(7+(b_ - t_)/2+tod_)+')')
-				.attr('id', id_prefix+'_text')
-				.classed('internal_label', true)
-				.text(text);
-			group.append('title').text(text);
-		}
-	};
+	// BS_Display.prototype.draw_rect = function(parent_element, position_dict, id_prefix, text) {
+	// 	var l_ = position_dict.left;
+	// 	var t_ = position_dict.top;
+	// 	var r_ = position_dict.rght;
+	// 	var b_ = position_dict.btm;
+	// 	var tor_ = position_dict.text_offset_rght || 0;
+	// 	var tod_ = position_dict.text_offset_down || 0;
+	// 	var group = parent_element.append('g')
+	// 		.attr('id', id_prefix+'_g')
+	// 		.attr('transform', 'translate('+this.x_scale(l_)+','+this.y_scale(t_)+')')
+	// 	group.append('rect')
+	// 		.attr('width', this.x_scale(r_ - l_))
+	// 		.attr('height', this.y_scale(b_ - t_))
+	// 		.attr('x', 0)
+	// 		.attr('y', 0)
+	// 		.attr('id', id_prefix+'_rect');
+	// 	if(text) {
+	// 		group.append('text')
+	// 			.attr('transform', 'translate('+this.x_scale((r_ - l_)/2+tor_)+','+this.y_scale(7+(b_ - t_)/2+tod_)+')')
+	// 			.attr('id', id_prefix+'_text')
+	// 			.classed('internal_label', true)
+	// 			.text(text);
+	// 		group.append('title').text(text);
+	// 	}
+	// };
 	BS_Display.prototype.draw_external_label = function(parent_element, position_dict, id_prefix, text, left, decrement_increment) {
 		var l_ = position_dict.left;
 		var t_ = position_dict.top;	
@@ -689,7 +678,6 @@ var vizfin = vizfin || {};
 		this._left_offset = 0;
 		this.draw_rects();
 		this.draw_labels();
-		// this.draw_FCFF_path(this.svg_group);
 	};
 
 	global_ref.BS_Display = BS_Display;

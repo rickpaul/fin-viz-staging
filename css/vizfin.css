@@ -9,16 +9,31 @@ svg {
 	user-select: none;
 }
 
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
 
-path.FCFF_path{
-	stroke: #FFF;
+circle.point {
+	stroke: #000000;
+	stroke-width: .5px;
+}
+
+path.display_path{
 	stroke-width: 4;
 	fill: none;
 	stroke-opacity:0.8;
-	stroke-dasharray: '5,5';
+	stroke-dasharray: 10 5;
 	stroke-linecap: 'square';
 }
-
+path.final_path{
+	stroke: #FFF;
+}
+path.intermediate_path{
+	stroke: #FCECC5;
+}
 
 path.curly_brace_path {
 	stroke: #000000;
@@ -26,8 +41,14 @@ path.curly_brace_path {
 	fill: none;
 	stroke-opacity:0.5;
 }
+
 rect.active{
 	stroke-opacity:1.0;
+}
+rect.button_rect{
+	fill: #999; /* matches svg background-color */
+	stroke-width: 3px;
+	stroke: #000;
 }
 
 text.internal_label {
@@ -37,11 +58,26 @@ text.internal_label {
 	letter-spacing: 3px;
 	fill: #FCECC5;
 }
-text.curly_brace_label {
+text.external_label {
 	pointer-events: none;
 	text-anchor: middle;
-	font: 16px serif;
-	fill: #000000;
+	font: 14px serif;
+	fill: #000;
+}
+text.title_text {
+	pointer-events: none;
+	text-anchor: middle;
+	font: 30px serif;
+	letter-spacing: 2px;
+	fill: #000;
+}
+text.equation_text {
+	pointer-events: none;
+	text-anchor: left;
+	font: 15px serif;
+	letter-spacing: 1px;
+	font-style: oblique;
+	fill: #EEE;
 }
 
 /*BALANCE SHEET*/

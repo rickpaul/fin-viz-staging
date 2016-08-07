@@ -1,12 +1,15 @@
 /*
 	This code has many inefficiencies that could be cleaned up.
-		It's not a big deal, since we're still relatively lightweight and 
-		not drawing a lot. It is ugly though.
+		It's not a big deal, since we're still not drawing a lot. 
+		It is ugly though.
 	Inefficiencies:
 		1) 	Every time you get a rectangle size, it makes a recursive call 
 				down the stack of rectangles it depends on.
 		2) 	We're re-drawing every time we resize. We should take advantage 
 				of d3's update.
+	Todos:
+		1) Rename 'grouping' to 'redrawable' or something
+		2) 
 */
 'use strict'
 var vizfin = vizfin || {};
@@ -20,6 +23,13 @@ var vizfin = vizfin || {};
 		rght: 300,
 	};
 
+	var equation_space = 10;
+	var button_space = 30;
+	var button_height = 36;
+	var button_width = 150;
+
+	var animation_time = 600;
+
 	var width = 400;
 	var brace_width = 28;
 	var brace_space = 5;
@@ -32,7 +42,7 @@ var vizfin = vizfin || {};
 		// Call Super-Constructor
 		////////////////////////////////////////////////////////////////////////
 		vizfin.vizfin_Base.call(this, svg_);
-
+		// Draw Title
 		this.title_group
 			.append('svg:text')
 		.text('Free Cash Flow to the Firm (FCFF)')
@@ -296,6 +306,8 @@ var vizfin = vizfin || {};
 			get: function() { return width; },
 		});
 	};
+	FCFF_Display.prototype = Object.create(vizfin.vizfin_Base.prototype);
+	FCFF_Display.prototype.constructor = FCFF_Display;
 	////////////////////////////////////////////////////////////////////////
 	// FCFF DISPLAY Prototype Functions 
 	////////////////////////////////////////////////////////////////////////
@@ -331,16 +343,57 @@ var vizfin = vizfin || {};
 		this.draw_rect_corners(this.svg_group, 'wc_inv', this.working_capital_inv_pos, 'WCInv');
 	};
 	FCFF_Display.prototype.draw_buttons = function() {
-		var count = 0;
-		
+		var button_count = 0;
 		var position = {
-			left: this.rect_width + this._left_offset * (brace_width + brace_space),
-			top: ((button_height + button_space) * count) + MARGINS.top,
+			left: MARGINS.left+this.rect_width+((this._left_offset+2)*(brace_width+brace_space)),
+			top: MARGINS.top,
 		};
-		position.rght = position.left + button_width
+		position.rght = position.left + button_width;
 		position.btm = position.top + button_height;
+		// FCFF from EBIT
+		this.draw_rect_noscale(this.button_group, 'FCFF_EBIT', position, 'FCFF from EBIT')
+			.classed('button_rect', true) // TODO: move this into base
+			.on('mouseover', function(){
+				var t = 0;
+				setTimeout(function(){$('#FCFF_path').fadeOut(animation_time)}, t);
+				t += animation_time;
+				setTimeout(function(){$('#EBIT_path').fadeIn(animation_time)}, t);
+				setTimeout(function(){$('#FCFF_EBIT_text_1').fadeIn(animation_time)}, t);
+				t += animation_time;
+				setTimeout(function(){$('#EBIT_path').fadeOut(animation_time)}, t);
+				setTimeout(function(){$('#FCFF_EBIT_text_1').fadeOut(animation_time)}, t);
+				t += animation_time;
+				setTimeout(function(){$('#EBIT_minus_Tax_path').fadeIn(animation_time)}, t);
+				t += animation_time;
+				setTimeout(function(){$('#EBIT_minus_Tax_path').fadeOut(animation_time)}, t);
+				t += animation_time;
+				setTimeout(function(){$('#EBIT_minus_Tax_plus_Dep_path').fadeIn(animation_time)}, t);
+				t += animation_time;
+				setTimeout(function(){$('#EBIT_minus_Tax_plus_Dep_path').fadeOut(animation_time)}, t);
+				t += animation_time;
+				setTimeout(function(){$('#FCFF_path').fadeIn(animation_time)}, t);
+			})
+		;
+		var equation_count = 1;
+		var equation_pos = {
+			x_: position.rght + equation_space,
+			y_: (position.top + position.btm)/2,
+			anchor_left: true
+		};
+		this.draw_text(this.button_group, 'FCFF_EBIT', equation_count++, 'equation_text', equation_pos, 'FCFF = EBIT');
+		// this.draw_text(this.button_group, 'FCFF_EBIT', equation_count++, 'equation_text', equation_pos, 'FCFF = EBIT(1-tax)');
+		// FCFF from EBITDA
+		count++;
+		position.top = ((button_height + button_space) * count);
+		position.btm = position.top + button_height;
+	};
 
-	}
+	FCFF_Display.prototype.draw_paths = function() {
+		this.draw_FCFF_path(this.svg_group);
+		this.draw_EBIT_path(this.svg_group);
+		this.draw_EBIT_minus_Tax_path(this.svg_group);
+		this.draw_EBIT_minus_Tax_plus_Dep_path(this.svg_group);
+	};
 	FCFF_Display.prototype.draw_labels = function() {
 		this.draw_external_label(this.svg_group, this.revenue_pos, 'revenue', 'Revenue', true);
 		this.draw_external_label(this.svg_group, this.EBIT_pos, 'EBIT', 'EBIT');
@@ -392,14 +445,40 @@ var vizfin = vizfin || {};
 			' L '+this.x_scale(this.EBITDA_pos.rght)+' '+this.y_scale(this.EBITDA_pos.top)+
 			' Z'
 		);
-		parent_element
-			.append('g')
-		.classed('grouping', true)
-		.attr('id', 'FCFF_path_g')
-			.append('svg:path')
-		.attr('d', path_)
-		.attr('stroke-dasharray', '10,5')
-		.classed('FCFF_path', true);
+		this.draw_display_path(parent_element, 'FCFF', '', 'final_path', path_);
+	};
+	FCFF_Display.prototype.draw_EBIT_path = function(parent_element) {
+		var path = [
+			[this.revenue_pos.left, this.EBIT_pos.top],
+			[this.revenue_pos.left, this.revenue_pos.btm],
+			[this.revenue_pos.rght, this.revenue_pos.btm],
+			[this.revenue_pos.rght, this.EBIT_pos.top],
+		];
+		var path_ = global_ref.generate_path(path, this.x_scale, this.y_scale);
+		this.draw_display_path(parent_element, 'EBIT', '', 'intermediate_path', path_);
+	};
+	FCFF_Display.prototype.draw_EBIT_minus_Tax_path = function(parent_element) {
+		var path = [
+			[this.revenue_pos.left, this.EBIT_pos.top],
+			[this.revenue_pos.left, this.revenue_pos.btm],
+			[this.paid_taxes_pos.left, this.revenue_pos.btm],
+			[this.paid_taxes_pos.left, this.EBIT_pos.top],
+		];
+		var path_ = global_ref.generate_path(path, this.x_scale, this.y_scale);
+		this.draw_display_path(parent_element, 'EBIT_minus_Tax', '', 'intermediate_path', path_);
+	};
+	FCFF_Display.prototype.draw_EBIT_minus_Tax_plus_Dep_path = function(parent_element) {
+		var path = [
+			[this.revenue_pos.left, this.EBITDA_pos.top],
+			[this.revenue_pos.left, this.revenue_pos.btm],
+			[this.paid_taxes_pos.left, this.revenue_pos.btm],
+			[this.paid_taxes_pos.left, this.EBIT_pos.top],
+			[this.revenue_pos.rght, this.EBIT_pos.top],
+			[this.revenue_pos.rght, this.EBITDA_pos.top],
+			[this.revenue_pos.left, this.EBITDA_pos.top],
+		];
+		var path_ = global_ref.generate_path(path, this.x_scale, this.y_scale);
+		this.draw_display_path(parent_element, 'EBIT_minus_Tax_plus_Dep', '', 'intermediate_path', path_);
 	};
 	FCFF_Display.prototype.draw = function() {
 		d3.selectAll('.grouping').remove();
@@ -407,7 +486,8 @@ var vizfin = vizfin || {};
 		this._left_offset = 0;
 		this.draw_rects();
 		this.draw_labels();
-		this.draw_FCFF_path(this.svg_group);
+		this.draw_paths();
+		this.draw_buttons();
 	};
 
 	global_ref.FCFF_Display = FCFF_Display;
