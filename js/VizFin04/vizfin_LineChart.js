@@ -44,23 +44,35 @@ var vizfin = vizfin || {};
 			.append('g')
 			.classed('axis', true)
 			.attr('transform', 'translate('+CHART_MARGINS.left+','+CHART_MARGINS.top+')');
-		// Add Points Holder
-		this.points = this.chart_area
-			.append('g')
-			.selectAll('g')
-			.classed('point', true);
+		// Add Line Holders
+		var chart_x_scale = this.x_scale;
+		var chart_y_scale = this.y_scale;
+		this.x_chart_line = d3.svg.line()
+			.interpolate('linear')
+			.x(function(d){ return chart_x_scale(d.dt); })
+			.y(function(d, i){ return chart_y_scale(d.x_val); });
+		this.y_chart_line = d3.svg.line()
+			.interpolate('linear')
+			.x(function(d){ return chart_x_scale(d.dt); })
+			.y(function(d, i){ return chart_y_scale(d.y_val); });
+
 	};
 	LineChart.prototype.add_data = function(line_data_) {
 		// Save Chart Data
 		this.chart_data = line_data_;
-		var extent = d3.extent( this.chart_data.x_val.concat(this.chart_data.y_val) );
+		var extent = d3.extent( 
+				this.chart_data.map(function(d){ return d.x_val })
+			.concat(
+				this.chart_data.map(function(d){ return d.y_val })
+			) 
+		);
 		// Redefine Scale Domains
 		// Doing this here, and not in every re-draw, for efficiency reasons.
 		// y_data is always above 0
 		this.y_scale.domain([ round_down(extent[0], 1), round_up(extent[1], 1) ]);
 		// data is time-sorted
-		var l = this.chart_data.dt.length;
-		this.x_scale.domain([ this.chart_data.dt[0], this.chart_data.dt[l-1]]);
+		var l = this.chart_data.length;
+		this.x_scale.domain([ this.chart_data[0].dt, this.chart_data[l-1].dt]);
 		// Call Scale
 		this.x_axis_svg
 			.attr('transform', 'translate('+CHART_MARGINS.left+','+(this.y_scale(1)+CHART_MARGINS.top)+')')
@@ -98,28 +110,18 @@ var vizfin = vizfin || {};
 		this.draw();
 	};
 	LineChart.prototype.draw = function() {
-		var chart_x_scale = this.x_scale;
-		var chart_y_scale = this.y_scale;
-		var x_data = this.chart_data.x_val;
-		var y_data = this.chart_data.y_val;
-		this.x_chart_line = d3.svg.line()
-			.interpolate('linear')
-			.x(function(d){ return chart_x_scale(d); })
-			.y(function(d, i){ return chart_y_scale(x_data[i]); });
-		this.y_chart_line = d3.svg.line()
-			.interpolate('linear')
-			.x(function(d){ return chart_x_scale(d); })
-			.y(function(d, i){ return chart_y_scale(y_data[i]); });
-
+		// Remove All
+		d3.selectAll('.redrawable').remove();
+		// Draw X
 		this.chart_area.append('svg:path')
-			.datum(this.chart_data.dt)
-			.attr('class', 'chart_line')
+			.datum(this.chart_data)
+			.attr('class', 'redrawable chart_line')
 			.attr('id', 'x_line')
 			.attr('d', this.x_chart_line);
-
+		// Draw Y
 		this.chart_area.append('svg:path')
-			.datum(this.chart_data.dt)
-			.attr('class', 'chart_line')
+			.datum(this.chart_data)
+			.attr('class', 'redrawable chart_line')
 			.attr('id', 'y_line')
 			.attr('d', this.y_chart_line);
 	};

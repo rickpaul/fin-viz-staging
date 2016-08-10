@@ -34,13 +34,14 @@ var vizfin = vizfin || {};
 	function StockStats(canvas_holder){
 		this.async_tasks = 0;
 
-		this.BetaChart = new vizfin_.BetaScatterChart(canvas_holder.svg);
-		this.LineChart = new vizfin_.LineChart(canvas_holder.svg);
-		canvas_holder.register_element(this.BetaChart, .5, .5, 0, 0, 'scatter');
-		canvas_holder.register_element(this.LineChart, 1, .5, 0, .5, 'line');
+		this.UpDownBetaChart = new vizfin_.BetaScatterChart(canvas_holder.svg);
+		this.HistoricPriceChart = new vizfin_.LineChart(canvas_holder.svg);
+		canvas_holder.register_element(this.UpDownBetaChart, .5, .5, 0, 0, 'BetaScatterChart');
+		canvas_holder.register_element(this.HistoricPriceChart, 1, .5, 0, .5, 'HistoryLineChart');
 
 		this.periodicity = periodicity_consts.daily;
 		this.period_diff = 30;
+		this.period_diff_stats = 30;
 		this._x_ticker = null;
 		this._x_db_ticker = null;
 		this._y_ticker = null;
@@ -118,21 +119,17 @@ var vizfin = vizfin || {};
 	StockStats.prototype.set_tickers = function(y_ticker) {
 		// 1) Set x_ticker, y_ticker,
 		this.x_ticker = 'SPY'; // DEBUG
-		this.y_ticker = y_ticker || 'AAPL'; // DEBUG
+		this.y_ticker = y_ticker || 'MSFT'; // DEBUG
 	};
 	StockStats.prototype._create_chart_data = function(x_idx, y_idx) {
 		var sorted_indices = this.raw_data.get_sorted_row_indices('n');
 		var j = this.period_diff;
 		var i = 0;
 		var l = sorted_indices.length;
-		var idx_1, idx_2, row_1, row_2, date;
+		var idx_1, idx_2, row_1, row_2, date_1, date_2;
 		var x_0, y_0, x_val, y_val;
 		this.diff_data = [];
-		this.line_data = {
-			'dt': [],
-			'x_val': [],
-			'y_val': []
-		};
+		this.line_data = [];
 		while ( i < l ) {
 			// Retrieve Earlier Data Point
 			idx_1 = this.raw_data._get_row_index(sorted_indices[i]);
@@ -143,19 +140,25 @@ var vizfin = vizfin || {};
 			y_val = row_1[y_idx];
 			if ( x_0 === undefined ) { x_0 = x_val; }
 			if ( y_0 === undefined ) { y_0 = y_val; }
-			this.line_data['dt'].push(parse_epoch_date(sorted_indices[i]));
-			this.line_data['x_val'].push(x_val/x_0);
-			this.line_data['y_val'].push(y_val/y_0);
+			
+			date_1 = parse_epoch_date(sorted_indices[i]);
+			
+			this.line_data.push({
+				'dt': date_1,
+				'x_val': x_val/x_0,
+				'y_val': y_val/y_0
+			});
 			// If Difference Data is Valid
-			if ( j < l )
-			{
+			if ( j < l ) {
 				// If Difference Data is Valid | Retrieve Later Data Point
 				idx_2 = this.raw_data._get_row_index(sorted_indices[j]);
 				if ( this.raw_data.get_row_len_by_idx(idx_2) != 2 ) { i++; j++; continue; }
 				row_2 = this.raw_data.get_row_by_idx(idx_2);
+				date_2 = parse_epoch_date(sorted_indices[j]);
 				// If Difference Data is Valid | Push Difference Data
 				this.diff_data.push({
-					dt: parse_epoch_date(sorted_indices[j]),
+					dt_0: date_1,
+					dt: date_2,
 					x: row_2[x_idx]/row_1[x_idx] - 1,
 					y: row_2[y_idx]/row_1[y_idx] - 1,
 				});
@@ -164,6 +167,22 @@ var vizfin = vizfin || {};
 			i++;
 			j++;
 		}
+		// // Determine Trailing Stats. THIS IS HUGELY INEFFICIENT (Can be done better)!
+		// var x_diff_series = this.diff_data.map(function(d){return d.x;});
+		// var y_diff_series = this.diff_data.map(function(d){return d.y;});
+		// var xy_covar = trailingCovariance(x_diff_series, y_diff_series, this.period_diff_stats);
+		// var x_var = trailingVariance(x_diff_series, this.period_diff_stats);
+		// this.trailingVol = trailingVariance(y_diff_series, this.period_diff_stats); // USELESS
+		// this.trailingBeta = [];
+		// this.trailingAlpha = [];
+		// var beta, alpha, correlation;
+		// [beta, alpha, correlation] = trailingCorrelation(x_diff_series, y_diff_series, this.period_diff_stats);
+		// this.abc_data = []; // alpha, beta, correlation
+		// var covariance = trailingCovariance()
+		// for (var i = 0; i < x_diff_series.length; i++) {
+		// 	x_diff_series[i]
+		// };
+
 	};
 	StockStats.prototype.load_data = function() {
 		if (this.async_tasks != 0) {return;}
