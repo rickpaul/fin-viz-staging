@@ -44,18 +44,14 @@ var vizfin = vizfin || {};
 			.append('g')
 			.classed('axis', true)
 			.attr('transform', 'translate('+CHART_MARGINS.left+','+CHART_MARGINS.top+')');
-		// Add Line Holders
-		var chart_x_scale = this.x_scale;
-		var chart_y_scale = this.y_scale;
-		this.x_chart_line = d3.svg.line()
-			.interpolate('linear')
-			.x(function(d){ return chart_x_scale(d.dt); })
-			.y(function(d, i){ return chart_y_scale(d.x_val); });
-		this.y_chart_line = d3.svg.line()
-			.interpolate('linear')
-			.x(function(d){ return chart_x_scale(d.dt); })
-			.y(function(d, i){ return chart_y_scale(d.y_val); });
-
+		// Add Line Holder
+		this.line_data = [];
+	};
+	LineChart.prototype.add_line = function(dict_ref, css_id) {
+		this.line_data.push({
+			dict_ref: dict_ref,
+			css_id: css_id
+		});
 	};
 	LineChart.prototype.add_data = function(line_data_) {
 		// Save Chart Data
@@ -80,7 +76,7 @@ var vizfin = vizfin || {};
 		this.y_axis_svg
 			.call(this.y_axis);
 		this.draw();
-	}
+	};
 	LineChart.prototype.redefine_y_scale_domain = function() {
 		// Do nothing. Here for calibrate_canvas function
 		// Domain set in add_data for efficiency.
@@ -110,20 +106,21 @@ var vizfin = vizfin || {};
 		this.draw();
 	};
 	LineChart.prototype.draw = function() {
-		// Remove All
+		// Remove All Lines
 		d3.selectAll('.redrawable').remove();
-		// Draw X
-		this.chart_area.append('svg:path')
-			.datum(this.chart_data)
-			.attr('class', 'redrawable chart_line')
-			.attr('id', 'x_line')
-			.attr('d', this.x_chart_line);
-		// Draw Y
-		this.chart_area.append('svg:path')
-			.datum(this.chart_data)
-			.attr('class', 'redrawable chart_line')
-			.attr('id', 'y_line')
-			.attr('d', this.y_chart_line);
+		// Draw Lines
+		var this_ = this;
+		this.line_data.forEach(function(line_){
+			this_.chart_area.append('svg:path')
+				.datum(this_.chart_data)
+				.attr('class', 'redrawable chart_line')
+				.attr('id', line_.css_id)
+				.attr('d', d3.svg.line()
+					.interpolate('linear')
+					.x(function(d){ return this_.x_scale(d.dt); })
+					.y(function(d, i){ return this_.y_scale( d[line_.dict_ref] ); })
+				);
+		});
 	};
 
 	vizfin_.LineChart = LineChart;

@@ -36,6 +36,8 @@ var vizfin = vizfin || {};
 
 		this.UpDownBetaChart = new vizfin_.BetaScatterChart(canvas_holder.svg);
 		this.HistoricPriceChart = new vizfin_.LineChart(canvas_holder.svg);
+		this.HistoricPriceChart.add_line('x_val', 'x_line');
+		this.HistoricPriceChart.add_line('y_val', 'y_line');
 		canvas_holder.register_element(this.UpDownBetaChart, .5, .5, 0, 0, 'BetaScatterChart');
 		canvas_holder.register_element(this.HistoricPriceChart, 1, .5, 0, .5, 'HistoryLineChart');
 
@@ -202,8 +204,8 @@ var vizfin = vizfin || {};
 					this_.raw_data.add_entry_by_name_idx(d[0], y_idx, +d[1]);
 				});
 				this_._create_chart_data(x_idx, y_idx);
-				this_.BetaChart.add_data(this_.diff_data);
-				this_.LineChart.add_data(this_.line_data);
+				this_.UpDownBetaChart.add_data(this_.diff_data);
+				this_.HistoricPriceChart.add_data(this_.line_data);
 			});
 		// vizfin_.AJAX.get_data_series_history(this._x_source_id, function(error, data){
 		// 	data.forEach(function(d){
