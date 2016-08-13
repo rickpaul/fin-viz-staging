@@ -22,17 +22,27 @@ circle.point {
 	stroke-opacity:0.8;
 	opacity: 0.3;
 }
-
+path.beta_line {
+	stroke-width: 2;
+	fill: none;
+	stroke-opacity: 1;
+}
 path.chart_line {
 	stroke-width: 1.2;
 	fill: none;
-	stroke-opacity:0.8;
+	stroke-opacity: 0.8;
 }
 #y_line {
 	stroke: #FFF;
 }
 #x_line {
 	stroke: #000;
+}
+#dn_mkt_line {
+	stroke: #FAA;
+}
+#up_mkt_line {
+	stroke: #AAF;
 }
 
 path.display_path{
