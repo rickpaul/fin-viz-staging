@@ -24,7 +24,6 @@ var vizfin = vizfin || {};
 				.classed('chart_g', true)
 				.attr('transform', 'translate('+CHART_MARGINS.left+','+CHART_MARGINS.top+')');
 		this.chart_data = [];
-		this.chart_line = null;
 		// Add Scales
 		this.x_scale = d3.time.scale()
 			.range([0, svg_width_ - CHART_MARGINS.rght - CHART_MARGINS.left]);
@@ -45,26 +44,22 @@ var vizfin = vizfin || {};
 			.classed('axis', true)
 			.attr('transform', 'translate('+CHART_MARGINS.left+','+CHART_MARGINS.top+')');
 		// Add Line Holder
-		this.line_data = [];
+		this.line_metadata = {};
 	};
 	LineChart.prototype.add_line = function(dict_ref, css_id) {
-		this.line_data.push({
-			dict_ref: dict_ref,
+		this.line_metadata[dict_ref] = {
 			css_id: css_id
-		});
+		};
 	};
 	LineChart.prototype.add_data = function(line_data_) {
 		// Save Chart Data
 		this.chart_data = line_data_;
-		var extent = d3.extent( 
-				this.chart_data.map(function(d){ return d.x_val })
-			.concat(
-				this.chart_data.map(function(d){ return d.y_val })
-			) 
-		);
+
+		var data_keys = Object.keys(this.line_metadata);
+		var extent = vizfin_.Help.extent_reduce_dict(this.chart_data, data_keys);
 		// Redefine Scale Domains
 		// Doing this here, and not in every re-draw, for efficiency reasons.
-		// y_data is always above 0
+		// Can do the following because y_data is always above 0
 		this.y_scale.domain([ round_down(extent[0], 1), round_up(extent[1], 1) ]);
 		// data is time-sorted
 		var l = this.chart_data.length;
@@ -107,18 +102,19 @@ var vizfin = vizfin || {};
 	};
 	LineChart.prototype.draw = function() {
 		// Remove All Lines
-		d3.selectAll('.redrawable').remove();
+		d3.selectAll('.chart_line').remove();
 		// Draw Lines
 		var this_ = this;
-		this.line_data.forEach(function(line_){
+		var data_keys = Object.keys(this.line_metadata);
+		data_keys.forEach(function(dict_ref){
 			this_.chart_area.append('svg:path')
 				.datum(this_.chart_data)
-				.attr('class', 'redrawable chart_line')
-				.attr('id', line_.css_id)
+				.classed('chart_line', true)
+				.attr('id', this_.line_metadata[dict_ref].css_id)
 				.attr('d', d3.svg.line()
 					.interpolate('linear')
 					.x(function(d){ return this_.x_scale(d.dt); })
-					.y(function(d, i){ return this_.y_scale( d[line_.dict_ref] ); })
+					.y(function(d, i){ return this_.y_scale( d[dict_ref] ); })
 				);
 		});
 	};
